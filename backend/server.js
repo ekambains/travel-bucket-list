@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import { connectDB } from './config/db.js';
 import User from './models/user.model.js';
 import bcrypt from 'bcrypt';
-import mongoose from 'mongoose';
+import jwt from 'jsonwebtoken';
 
 dotenv.config();
 
@@ -17,7 +17,7 @@ app.get("/",(req, res) => {
     res.send("<h1>Jatt</h1>");
 });
 
-app.post("/user", async(req, res) => {
+app.post("/signup", async(req, res) => {
     try {
         const user = req.body;
         if(!user.username || !user.email || !user.password) {
@@ -35,28 +35,42 @@ app.post("/user", async(req, res) => {
     }
 });
 
-app.post("/user/login", async(req, res) => {
+app.post("/login", async(req, res) => {
     try {
         const user = await User.findOne({
             $or: [{ username: req.body.username }, { email: req.body.username }]
         });
 
         if(!user) {
-            res.json({success: false, message: "User doesn't exist."});
+            return res.status(404).json({success: false, message: "User doesn't exist."});
         }
 
-        if(await bcrypt.compare(req.body.password, user.password)) {
-            res.json({success: true, message: "Login Successful"});
-        }
-        else {
-            res.json({success: false, message: "Incorrect Password"});
+        if(!await bcrypt.compare(req.body.password, user.password)) {
+            return res.status(401).json({success: false, message: "Incorrect Password"});
         }
 
+        const payload = {id: user._id, username: user.username, email: user.email};
+        const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET);
+        res.status(200).json({success: true, message: "Login Successful", accessToken: accessToken});
+        
     } catch (error) {
         console.error(error);
         res.status(500).json({success: false, message: "An error occured during login."})
     }
 });
+
+function authenticateToken(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if(token == null) return res.sendStatus(401);
+
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+        if(err) return res.sendStatus(403);
+        req.user = user;
+        next();
+    })
+}
 
 app.listen(PORT, () => {
     connectDB();
