@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from "dotenv";
 import { connectDB } from './config/db.js';
 import User from './models/user.model.js';
+import bcrypt from 'bcrypt';
 
 dotenv.config();
 
@@ -20,7 +21,10 @@ app.post("/user", async(req, res) => {
     if(!user.username || !user.email || !user.password) {
         return res.status(400).json({success: false, message: "Please provide all fields"});
     }
-
+    const salt = await bcrypt.genSalt();
+    user.password =  await bcrypt.hash(user.password, salt);
+    console.log(salt);
+    console.log(user.password);
     const newUser = new User(user);
 
     try {
