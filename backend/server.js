@@ -4,6 +4,7 @@ import { connectDB } from './config/db.js';
 import User from './models/user.model.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import BucketList from './models/bucketList.model.js';
 
 dotenv.config();
 
@@ -71,6 +72,16 @@ function authenticateToken(req, res, next) {
         next();
     })
 }
+
+app.get("/getBucket", authenticateToken, async(req, res) => {
+    try {
+        const bucketList = await BucketList.find({userId: req.user._id});
+        res.status(200).json({success: true, data: bucketList});
+    } catch (error) {
+        console.log("Error in fetching buckets: ", error.message);
+        res.status(500).json({success: false, message: "Server Error"});
+    }
+});
 
 app.listen(PORT, () => {
     connectDB();
