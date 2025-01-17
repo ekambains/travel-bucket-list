@@ -75,10 +75,25 @@ function authenticateToken(req, res, next) {
 
 app.get("/getBucket", authenticateToken, async(req, res) => {
     try {
-        const bucketList = await BucketList.find({userId: req.user._id});
+        const bucketList = await BucketList.find({userId: req.user.id});
         res.status(200).json({success: true, data: bucketList});
     } catch (error) {
         console.log("Error in fetching buckets: ", error.message);
+        res.status(500).json({success: false, message: "Server Error"});
+    }
+});
+
+app.post("/createBucket", authenticateToken, async(req, res) => {
+    try {
+        const bucket = req.body;
+        if(!bucket.destination || !bucket.description || !bucket.visited) {
+            return res.status(400).json({success: false, message: "Please provide all fields."});
+        }
+        const newBucket = new BucketList({userId: req.user.id, destination: bucket.destination, description: bucket.description, visited: bucket.visited});
+        await newBucket.save();
+        return res.status(201).json({success: true, data: newBucket});
+    } catch(error) {
+        console.error("Error in creating bucket: ", error.message);
         res.status(500).json({success: false, message: "Server Error"});
     }
 });
