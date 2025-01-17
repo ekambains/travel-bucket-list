@@ -114,7 +114,23 @@ app.put("/api/bucket/:id", authenticateToken, async(req, res) => {
         console.error("Error in updating bucket is: ", error.message);
         res.status(500).json({success: false, message: "Server Error"});
     }
-})
+});
+
+app.delete("/api/bucket/:id", authenticateToken, async(req, res) => {
+    const {id} = req.params;
+
+    if(!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).json({success: false, message: "Invalid Bucket ID."});
+    }
+
+    try {
+        await BucketList.findByIdAndDelete(id);
+        res.status(200).json({success: true, message: "Product Deleted Successfully."});
+    } catch (error) {
+        console.error("Error in deleting bucket: ", error.message);
+        res.status(500).json({ success: false, message: "Server Error"});
+    }
+});
 
 app.listen(PORT, () => {
     connectDB();
