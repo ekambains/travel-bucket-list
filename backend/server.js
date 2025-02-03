@@ -12,6 +12,8 @@ const PORT = 5000;
 
 app.use(express.json());
 
+app.use(express.urlencoded({ extended: true }));
+
 app.use("/api/bucket", bucketRouter);
 
 app.use("/api/user", userRouter);

@@ -1,4 +1,5 @@
-import BucketList from "../models/bucketList.model";
+import BucketList from "../models/bucketList.model.js";
+import mongoose from "mongoose";
 
 export const getBucket = async(req, res) => {
     try {

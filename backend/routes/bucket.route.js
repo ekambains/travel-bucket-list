@@ -1,6 +1,6 @@
 import express from 'express'
-import authenticateToken from '../middlewares/authenticateToken';
-import { createBucket, deleteBucket, getBucket, updatedBucket } from '../controllers/bucketList.controller';
+import authenticateToken from '../middlewares/authenticateToken.js';
+import { createBucket, deleteBucket, getBucket, updatedBucket } from '../controllers/bucketList.controller.js';
 
 const bucketRouter = express.Router();
 
