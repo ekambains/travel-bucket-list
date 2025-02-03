@@ -1,3 +1,5 @@
+import jwt from "jsonwebtoken";
+
 export default function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
@@ -8,5 +10,5 @@ export default function authenticateToken(req, res, next) {
         if(err) return res.sendStatus(403);
         req.user = user;
         next();
-    })
+    });
 }

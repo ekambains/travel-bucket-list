@@ -1,14 +1,16 @@
 import User from "../models/user.model";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 export const signup = async(req, res) => {
-    const user = user.body;
-    if(!user.email || !user.username || !user.password) {
-        return res.status(400).json({success: false, message: "Please provide all fields"});
-    }
-
-    const newUser = new User(user);
-
     try {
+        const user = req.body;
+        if(!user.username || !user.email || !user.password) {
+            return res.status(400).json({success: false, message: "Please provide all fields"});
+        }
+        user.password =  await bcrypt.hash(user.password, 10);
+        console.log(user.password);
+        const newUser = new User(user);
         await newUser.save();
         res.status(201).json({success: true, data: newUser});
     }
